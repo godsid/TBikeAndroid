@@ -1,12 +1,17 @@
 package info.srihawong.tbike;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,34 +19,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.ProgressBar;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URLEncoder;
-import java.sql.ClientInfoStatus;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -50,7 +35,7 @@ public class MainActivity extends ActionBarActivity
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
-
+    private PlaceholderFragment placeholderFragment;
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
@@ -60,12 +45,6 @@ public class MainActivity extends ActionBarActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // Permission StrictMode
-        if (android.os.Build.VERSION.SDK_INT > 9) {
-            //StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            //StrictMode.setThreadPolicy(policy);
-        }
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -82,7 +61,7 @@ public class MainActivity extends ActionBarActivity
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                .replace(R.id.container, placeholderFragment.newInstance(position + 1))
                 .commit();
     }
 
@@ -142,10 +121,12 @@ public class MainActivity extends ActionBarActivity
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
-
+        private static final String ARG_SECTION_FORUM_ID = "forum_id";
         private ListView topicListView;
-        private String[] topics;
-        private String[] topics2;
+        private ProgressBar progressBar;
+        private ArrayList<TopicListItem> topicListItems = new ArrayList<TopicListItem>();
+        private TopicListAdapter topicListAdapter;
+
         /**
          * Returns a new instance of this fragment for the given section
          * number.
@@ -153,7 +134,18 @@ public class MainActivity extends ActionBarActivity
         public static PlaceholderFragment newInstance(int sectionNumber) {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
+            String forumID;
+            switch(sectionNumber){
+                case 1:
+                    forumID = "153";
+                    break;
+                case 2:
+                default:
+                    forumID = "3";
+                    break;
+            }
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            args.putString(ARG_SECTION_FORUM_ID,forumID);
             fragment.setArguments(args);
             return fragment;
         }
@@ -165,42 +157,87 @@ public class MainActivity extends ActionBarActivity
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-
             topicListView = (ListView) rootView.findViewById(R.id.topicListView);
-            topics = new String[] {"xxxx","cccc","ddddd"};
-            topics2 = new String[] {"qqqq","qqqq","aaaa"};
-
-            textView.setText(Integer.toString(getArguments().getInt(ARG_SECTION_NUMBER)));
-
-            ArrayAdapter<String> topicAdapter ;
-
-            try {
-                JSONArray listJson = new JSONArray(getJSONUrl("http://srihawong.info/app/tmb/json.php"));
-
-                final ArrayList<HashMap<String, String>> MyArrList = new ArrayList<HashMap<String, String>>();
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
 
 
-            if(getArguments().getInt(ARG_SECTION_NUMBER)==1){
-                topicAdapter = new ArrayAdapter<String>(this.getActivity(),android.R.layout.simple_list_item_1,topics);
-            }else{
-                topicAdapter = new ArrayAdapter<String>(this.getActivity(),android.R.layout.simple_list_item_1,topics2);
-            }
-            topicListView.setAdapter(topicAdapter);
 
-            topicListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            class TopicsJson extends AsyncTask<String, Integer, Long>{
+                private JSONObject resultTopicJSON;
+                //private ProgressDialog progressDialog = new ProgressDialog();
                 @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    Intent openDetail = new Intent(getActivity().getApplicationContext(),DetailActivity.class);
-                    startActivity(openDetail);
-                    getActivity().overridePendingTransition(R.layout.open_right,R.layout.close_right);
-                }
-            });
+                protected void onPreExecute() {
+                    progressBar.setVisibility(View.VISIBLE);
 
+                    //MainActivity.this
+                    //ProgressDialog.show(get, "title", "message");
+                   /* progressDialog.setMax(100);
+                    progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                    progressDialog.setTitle("Loading...");
+                    progressDialog.setMessage("กำลังโหดอยู่รอซักครู่");
+                              */
+                    //super.onPreExecute();
+
+
+                }
+
+
+
+                @Override
+                protected Long doInBackground(String... strings) {
+                    String forumID = getArguments().getString(ARG_SECTION_FORUM_ID);
+                    String apiUrl = getResources().getString(R.string.api_forum);
+                    Log.d("tui","GET:"+(apiUrl+"?f="+forumID));
+                    resultTopicJSON = new ApiJsonData((apiUrl+"?f="+forumID)).getJsonObject();
+                    /*
+                    try {
+                        resultTopicJSON = new JSONObject("{\"status\":\"OK\",\"result\":[{\"createdate\":\"13 ก.ย. 2012 23:13\",\"f_id\":\"14\",\"topic_id\":\"596584\",\"title\":\"ชวนลงขัน/ตั้งค่าหัว  &quot;กองทุนให้รางวัลนำจับโจรทำร้ายและปล้นชาวจักรยาน&quot; ..... เปิดบัญชีรับโอนเงินแล้วครับ // update สมุด 16/10/55\",\"user_id\":\"57\",\"user_name\":\"nbt\"},{\"createdate\":\"29 ก.ย. 2010 11:21\",\"f_id\":\"3\",\"topic_id\":\"245525\",\"title\":\"== ผิดกติกาขาย แบนเตือน7 วัน ผู้ซื้อโปรดระวังจะติดต่อไม่ได้=\",\"user_id\":\"57\",\"user_name\":\"nbt\"},{\"createdate\":\"28 ก.ย. 2010 01:32\",\"f_id\":\"3\",\"topic_id\":\"245089\",\"title\":\"แนวทางในการดำเนินการเมื่อเกิดเหตุโดนฉ้อโกง\",\"user_id\":\"57\",\"user_name\":\"nbt\"}]}");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    */
+                    return null;
+                }
+                @Override
+                public void onPostExecute(Long aLong) {
+                    super.onPostExecute(aLong);
+                    Log.d("tui", "Receive data");
+
+                    try {
+                        JSONArray resultTopicArray = resultTopicJSON.getJSONArray("result");
+                        if (resultTopicArray.length()>0) {
+                            topicListItems.clear();
+                            for(Integer i=0,j=resultTopicArray.length();i<j;i++){
+                                topicListItems.add(new TopicListItem(
+                                        resultTopicArray.getJSONObject(i).getInt("topic_id"),
+                                        resultTopicArray.getJSONObject(i).getString("user_name"),
+                                        resultTopicArray.getJSONObject(i).getString("title"),
+                                        resultTopicArray.getJSONObject(i).getString("createdate")));
+                            }
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    topicListAdapter = new TopicListAdapter(getActivity().getBaseContext(),topicListItems);
+                    topicListView.setAdapter(topicListAdapter);
+                    topicListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                            Intent openDetail = new Intent(getActivity().getApplicationContext(),DetailActivity.class);
+                            openDetail.putExtra("topic_id",topicListItems.get(position).getTopicId());
+                            openDetail.putExtra("title",topicListItems.get(position).getTitle());
+                            startActivity(openDetail);
+                            getActivity().overridePendingTransition(R.layout.transition_fromright,R.layout.transition_toleft);
+                        }
+                    });
+                    progressBar.setVisibility(View.INVISIBLE);
+                    //progressDialog.dismiss();
+
+                }
+            }
+
+            new TopicsJson().execute();
             return rootView;
         }
 
@@ -211,38 +248,9 @@ public class MainActivity extends ActionBarActivity
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
 
-        public String getJSONUrl(String url) {
-            StringBuilder str = new StringBuilder();
-            HttpClient client = new DefaultHttpClient();
-            HttpGet httpGet = new HttpGet(url);
-
-            try {
-
-                HttpResponse response = client.execute(httpGet);
-                StatusLine statusLine = response.getStatusLine();
-
-                int statusCode = statusLine.getStatusCode();
-                if (statusCode == 200) { // Download OK
-                    HttpEntity entity = response.getEntity();
-                    InputStream content = entity.getContent();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(content));
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        str.append(line);
-                    }
-                } else {
-                   // Log.e("log","dsddsd");
-                    //Log.e("Log", "Failed to download file..");
-                }
-
-            } catch (ClientProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return str.toString();
+        public void success(String result){
+            Log.d("tui",result);
         }
-
     }
 
 }

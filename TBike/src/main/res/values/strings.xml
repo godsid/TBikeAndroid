@@ -9,6 +9,6 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_example">Example action</string>
     <string name="action_settings">Settings</string>
-    <string name="api_forum_list">http://srihawong.info/thaimtb.php</string>
-
+    <string name="api_forum">http://srihawong.info/app/tmb/forum.php</string>
+    <string name="api_topic">http://www.thaimtb.com/forum/viewtopic.php</string>
 </resources>

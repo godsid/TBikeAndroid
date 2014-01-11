@@ -1,31 +1,50 @@
 package info.srihawong.tbike;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.view.DragEvent;
+import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
-
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 
 /**
- * Created by Demo on 1/9/14 AD.
+ * Created by Banpot.S on 10/1/2557.
  */
-public class DetailActivity extends Activity {
-
+public class DetailActivity extends Activity{
+    WebView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_detail);
-        TextView textview = (TextView)findViewById(R.id.textView);
+
+
+        ProgressDialog progressDialog = new ProgressDialog(DetailActivity.this,R.style.TransparentProgressDialog);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Loading.....");
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        //progressDialog.setIndeterminateDrawable(R.style.TransparentProgressDialog);
+
+        progressDialog.show();
+
+
+        WebView webView = (WebView) findViewById(R.id.webView);
+        WebSettings webSettings = webView.getSettings();
+
+        Integer topicId = getIntent().getIntExtra("topic_id",0);
+
+        if(topicId!=0){
+            String apiUrl = getResources().getString(R.string.api_topic)+"?t="+String.valueOf(topicId);
+            Log.d("tui", String.valueOf(apiUrl));
+            webView.loadUrl(apiUrl);
+        }
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        finish();
-        overridePendingTransition(R.layout.open_left,R.layout.close_left);
 
+        overridePendingTransition(R.layout.transition_fromleft, R.layout.transition_toright);
     }
 }
