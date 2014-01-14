@@ -108,6 +108,9 @@ public class MainActivity extends ActionBarActivity
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
+        }else if(id== R.id.action_about){
+            Intent aboutIntent = new Intent(getApplicationContext(),AboutActivity.class);
+            startActivity(aboutIntent);
         }
         return super.onOptionsItemSelected(item);
     }

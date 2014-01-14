@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 /**
  * Created by Banpot.S on 10/1/2557.
@@ -30,7 +31,18 @@ public class DetailActivity extends Activity{
 
 
         WebView webView = (WebView) findViewById(R.id.webView);
-        WebSettings webSettings = webView.getSettings();
+        //WebSettings webSettings = webView.getSettings();
+
+
+        WebViewClient webViewClient = new WebViewClient(){
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                Log.d("tui",url.toString());
+            }
+        };
+
+        webView.setWebViewClient(webViewClient);
 
         Integer topicId = getIntent().getIntExtra("topic_id",0);
 
@@ -39,6 +51,7 @@ public class DetailActivity extends Activity{
             Log.d("tui", String.valueOf(apiUrl));
             webView.loadUrl(apiUrl);
         }
+
     }
 
     @Override
