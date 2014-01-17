@@ -34,7 +34,11 @@ public class TopicListItem {
     }
 
     public String getTitle() {
-        return title;
+
+        return title.replace("&amp;","&")
+                .replace("&gt;",">")
+                .replace("&lt;","<")
+                .replace("&quot;","\"");
     }
 
     public void setTitle(String title) {

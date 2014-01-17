@@ -21,6 +21,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,6 +55,18 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Toast.makeText(getApplicationContext(),"onResume",5000);
+    }
+
+    @Override
+    protected void onResumeFragments() {
+        super.onResumeFragments();
+        Toast.makeText(getApplicationContext(),"Fragement Resume",5000);
     }
 
     @Override
@@ -211,6 +224,9 @@ public class MainActivity extends ActionBarActivity
                         if (resultTopicArray.length()>0) {
                             topicListItems.clear();
                             for(Integer i=0,j=resultTopicArray.length();i<j;i++){
+                                if(resultTopicArray.getJSONObject(i).getInt("sticky")==1){
+                                    continue;
+                                }
                                 topicListItems.add(new TopicListItem(
                                         resultTopicArray.getJSONObject(i).getInt("topic_id"),
                                         resultTopicArray.getJSONObject(i).getString("user_name"),
