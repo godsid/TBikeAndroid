@@ -2,7 +2,9 @@ package info.srihawong.tbike;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.graphics.Point;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
@@ -21,8 +23,9 @@ public class DetailActivity extends Activity{
         setContentView(R.layout.activity_detail);
 
 
-        ProgressDialog progressDialog = new ProgressDialog(DetailActivity.this,R.style.TransparentProgressDialog);
+        final ProgressDialog progressDialog = new ProgressDialog(DetailActivity.this,R.style.TransparentProgressDialog);
         progressDialog.setIndeterminate(true);
+        progressDialog.setCanceledOnTouchOutside(false);
         progressDialog.setMessage("Loading.....");
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         //progressDialog.setIndeterminateDrawable(R.style.TransparentProgressDialog);
@@ -38,7 +41,7 @@ public class DetailActivity extends Activity{
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                Log.d("tui",url.toString());
+                progressDialog.dismiss();
             }
         };
 
@@ -47,7 +50,10 @@ public class DetailActivity extends Activity{
         Integer topicId = getIntent().getIntExtra("topic_id",0);
 
         if(topicId!=0){
-            String apiUrl = getResources().getString(R.string.api_topic)+"?t="+String.valueOf(topicId);
+            //Point screenPoint = new Point();
+            DisplayMetrics metrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            String apiUrl = getResources().getString(R.string.api_topic)+"?t="+String.valueOf(topicId)+"&w="+String.valueOf(metrics.widthPixels);
             Log.d("tui", String.valueOf(apiUrl));
             webView.loadUrl(apiUrl);
         }

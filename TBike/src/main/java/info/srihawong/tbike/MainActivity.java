@@ -59,23 +59,36 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     protected void onResume() {
+        Log.d("tui","OnResume");
         super.onResume();
+
         Toast.makeText(getApplicationContext(),"onResume",5000);
     }
 
     @Override
     protected void onResumeFragments() {
+        Log.d("tui","OnResumeFragments");
         super.onResumeFragments();
         Toast.makeText(getApplicationContext(),"Fragement Resume",5000);
     }
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
+
+        position = position + 1;
         // update the main content by replacing fragments
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, placeholderFragment.newInstance(position + 1))
-                .commit();
+
+        if(position==3){
+            Intent openDetail = new Intent(getApplicationContext(),DetailActivity.class);
+            openDetail.putExtra("topic_id",474812);
+            startActivity(openDetail);
+
+        }else{
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, placeholderFragment.newInstance(position))
+                    .commit();
+        }
     }
 
     public void onSectionAttached(int number) {
@@ -121,7 +134,7 @@ public class MainActivity extends ActionBarActivity
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
-        }else if(id== R.id.action_about){
+        }else if(id == R.id.action_about){
             Intent aboutIntent = new Intent(getApplicationContext(),AboutActivity.class);
             startActivity(aboutIntent);
         }
@@ -138,11 +151,14 @@ public class MainActivity extends ActionBarActivity
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
         private static final String ARG_SECTION_FORUM_ID = "forum_id";
+        private static final String ARG_SECTION_TOPIC_ID = "topic_id";
         private ListView topicListView;
         private ProgressBar progressBar;
         private ArrayList<TopicListItem> topicListItems = new ArrayList<TopicListItem>();
         private TopicListAdapter topicListAdapter;
 
+        private String forumID ;
+        private String topicID ;
         /**
          * Returns a new instance of this fragment for the given section
          * number.
@@ -172,10 +188,12 @@ public class MainActivity extends ActionBarActivity
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
+
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             topicListView = (ListView) rootView.findViewById(R.id.topicListView);
             progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
-
+            forumID = getArguments().getString(ARG_SECTION_FORUM_ID);
+            topicID = getArguments().getString(ARG_SECTION_TOPIC_ID,null);
 
 
             class TopicsJson extends AsyncTask<String, Integer, Long>{
@@ -201,8 +219,10 @@ public class MainActivity extends ActionBarActivity
 
                 @Override
                 protected Long doInBackground(String... strings) {
-                    String forumID = getArguments().getString(ARG_SECTION_FORUM_ID);
+                    //String forumID = getArguments().getString(ARG_SECTION_FORUM_ID);
+                    //String topicID = getArguments().getString(ARG_SECTION_TOPIC_ID,null);
                     String apiUrl = getResources().getString(R.string.api_forum);
+
                     Log.d("tui","GET:"+(apiUrl+"?f="+forumID));
                     resultTopicJSON = new ApiJsonData((apiUrl+"?f="+forumID)).getJsonObject();
                     /*
@@ -256,7 +276,11 @@ public class MainActivity extends ActionBarActivity
                 }
             }
 
-            new TopicsJson().execute();
+
+            TopicsJson topicsJson = new TopicsJson();
+            topicsJson.execute();
+
+
             return rootView;
         }
 
