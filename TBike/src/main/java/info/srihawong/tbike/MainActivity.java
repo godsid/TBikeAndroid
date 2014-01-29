@@ -70,6 +70,7 @@ public class MainActivity extends ActionBarActivity
         Log.d("tui","OnResumeFragments");
         super.onResumeFragments();
         Toast.makeText(getApplicationContext(),"Fragement Resume",5000);
+        restoreActionBar();
     }
 
     @Override
@@ -137,6 +138,8 @@ public class MainActivity extends ActionBarActivity
         }else if(id == R.id.action_about){
             Intent aboutIntent = new Intent(getApplicationContext(),AboutActivity.class);
             startActivity(aboutIntent);
+        }else if(id == R.id.action_refresh){
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -260,6 +263,20 @@ public class MainActivity extends ActionBarActivity
                     }
                     topicListAdapter = new TopicListAdapter(getActivity().getBaseContext(),topicListItems);
                     topicListView.setAdapter(topicListAdapter);
+
+                    topicListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                        @Override
+                        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                            Intent openDetail = new Intent(getActivity().getApplicationContext(),DetailActivity.class);
+                            openDetail.putExtra("topic_id",topicListItems.get(position).getTopicId());
+                            openDetail.putExtra("title",topicListItems.get(position).getTitle());
+                            openDetail.putExtra("original",true);
+                            startActivity(openDetail);
+                            getActivity().overridePendingTransition(R.layout.transition_fromright,R.layout.transition_toleft);
+                            return false;
+                        }
+                    });
+
                     topicListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
