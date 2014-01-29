@@ -8,3 +8,6 @@
 /build.gradle
 /gradle
 .idea
+/TBike.iml
+/tbike.properties
+/tbike.xml

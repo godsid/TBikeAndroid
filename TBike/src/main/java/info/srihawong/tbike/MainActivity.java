@@ -37,6 +37,8 @@ public class MainActivity extends ActionBarActivity
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private PlaceholderFragment placeholderFragment;
+
+    String[] sectionArray;
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
@@ -49,6 +51,9 @@ public class MainActivity extends ActionBarActivity
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+
+        sectionArray =  getResources().getStringArray(R.array.title_section);
+
         mTitle = getTitle();
 
         // Set up the drawer.
@@ -93,17 +98,7 @@ public class MainActivity extends ActionBarActivity
     }
 
     public void onSectionAttached(int number) {
-        switch (number) {
-            case 1:
-                mTitle = getString(R.string.title_section1);
-                break;
-            case 2:
-                mTitle = getString(R.string.title_section2);
-                break;
-            case 3:
-                mTitle = getString(R.string.title_section3);
-                break;
-        }
+        mTitle = sectionArray[number-1];
     }
 
     public void restoreActionBar() {
@@ -155,6 +150,7 @@ public class MainActivity extends ActionBarActivity
         private static final String ARG_SECTION_NUMBER = "section_number";
         private static final String ARG_SECTION_FORUM_ID = "forum_id";
         private static final String ARG_SECTION_TOPIC_ID = "topic_id";
+        private static final String ARG_SECTION_STICKY = "sticky";
         private ListView topicListView;
         private ProgressBar progressBar;
         private ArrayList<TopicListItem> topicListItems = new ArrayList<TopicListItem>();
@@ -162,6 +158,7 @@ public class MainActivity extends ActionBarActivity
 
         private String forumID ;
         private String topicID ;
+        private Boolean isSticky;
         /**
          * Returns a new instance of this fragment for the given section
          * number.
@@ -170,17 +167,24 @@ public class MainActivity extends ActionBarActivity
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
             String forumID;
+            Boolean isSticky = false;
             switch(sectionNumber){
                 case 1:
                     forumID = "153";
+                    break;
+                case 4:
+                    forumID = "153";
+                    isSticky = true;
                     break;
                 case 2:
                 default:
                     forumID = "3";
                     break;
+
             }
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            args.putString(ARG_SECTION_FORUM_ID,forumID);
+            args.putString(ARG_SECTION_FORUM_ID, forumID);
+            args.putBoolean(ARG_SECTION_STICKY,isSticky);
             fragment.setArguments(args);
             return fragment;
         }
@@ -197,7 +201,7 @@ public class MainActivity extends ActionBarActivity
             progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
             forumID = getArguments().getString(ARG_SECTION_FORUM_ID);
             topicID = getArguments().getString(ARG_SECTION_TOPIC_ID,null);
-
+            isSticky = getArguments().getBoolean(ARG_SECTION_STICKY, false);
 
             class TopicsJson extends AsyncTask<String, Integer, Long>{
                 private JSONObject resultTopicJSON;
@@ -226,8 +230,13 @@ public class MainActivity extends ActionBarActivity
                     //String topicID = getArguments().getString(ARG_SECTION_TOPIC_ID,null);
                     String apiUrl = getResources().getString(R.string.api_forum);
 
-                    Log.d("tui","GET:"+(apiUrl+"?f="+forumID));
-                    resultTopicJSON = new ApiJsonData((apiUrl+"?f="+forumID)).getJsonObject();
+                    apiUrl+= "?f="+forumID;
+                    if(isSticky){
+                        apiUrl+="&s=1";
+                    }
+
+                    Log.d("tui","GET:"+(apiUrl));
+                    resultTopicJSON = new ApiJsonData(apiUrl).getJsonObject();
                     /*
                     try {
                         resultTopicJSON = new JSONObject("{\"status\":\"OK\",\"result\":[{\"createdate\":\"13 ก.ย. 2012 23:13\",\"f_id\":\"14\",\"topic_id\":\"596584\",\"title\":\"ชวนลงขัน/ตั้งค่าหัว  &quot;กองทุนให้รางวัลนำจับโจรทำร้ายและปล้นชาวจักรยาน&quot; ..... เปิดบัญชีรับโอนเงินแล้วครับ // update สมุด 16/10/55\",\"user_id\":\"57\",\"user_name\":\"nbt\"},{\"createdate\":\"29 ก.ย. 2010 11:21\",\"f_id\":\"3\",\"topic_id\":\"245525\",\"title\":\"== ผิดกติกาขาย แบนเตือน7 วัน ผู้ซื้อโปรดระวังจะติดต่อไม่ได้=\",\"user_id\":\"57\",\"user_name\":\"nbt\"},{\"createdate\":\"28 ก.ย. 2010 01:32\",\"f_id\":\"3\",\"topic_id\":\"245089\",\"title\":\"แนวทางในการดำเนินการเมื่อเกิดเหตุโดนฉ้อโกง\",\"user_id\":\"57\",\"user_name\":\"nbt\"}]}");

@@ -5,6 +5,7 @@
     <string name="title_section1">กระดานข่าว</string>
     <string name="title_section2">ซื้อขาย</string>
     <string name="title_section3">5 แยกวัชรพล</string>
+    <string name="title_section4">ปักหมุด</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_example"> </string>
@@ -14,4 +15,12 @@
     <string name="api_forum">http://srihawong.info/app/tmb/forum.php</string>
     <string name="api_topic">http://srihawong.info/app/tmb/topic.php</string>
     <string name="api_topic_original">http://www.thaimtb.com/forum/viewtopic.php</string>
+    
+    <string-array name="title_section">
+        <item>กระดานข่าว</item>
+        <item>ซื้อขาย</item>
+        <item>5 แยกวัชรพล</item>
+        <item>ปักหมุด</item>
+    </string-array>
+    
 </resources>
