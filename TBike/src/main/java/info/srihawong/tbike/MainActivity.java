@@ -256,7 +256,7 @@ public class MainActivity extends ActionBarActivity
                         if (resultTopicArray.length()>0) {
                             topicListItems.clear();
                             for(Integer i=0,j=resultTopicArray.length();i<j;i++){
-                                if(resultTopicArray.getJSONObject(i).getInt("sticky")==1){
+                                if(!isSticky && resultTopicArray.getJSONObject(i).getInt("sticky")==1){
                                     continue;
                                 }
                                 topicListItems.add(new TopicListItem(
