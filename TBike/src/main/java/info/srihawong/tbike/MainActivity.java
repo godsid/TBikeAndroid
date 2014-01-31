@@ -39,6 +39,7 @@ public class MainActivity extends ActionBarActivity
     private PlaceholderFragment placeholderFragment;
 
     String[] sectionArray;
+    private Integer sectionSelectIndex = 0;
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
@@ -80,7 +81,7 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
-
+        sectionSelectIndex = position;
         position = position + 1;
         // update the main content by replacing fragments
 
@@ -133,9 +134,13 @@ public class MainActivity extends ActionBarActivity
         }else if(id == R.id.action_about){
             Intent aboutIntent = new Intent(getApplicationContext(),AboutActivity.class);
             startActivity(aboutIntent);
-        }else if(id == R.id.action_refresh){
-
+        }else if(id == R.id.action_refresh || id == R.id.action_navigation_refresh){
+            onNavigationDrawerItemSelected(sectionSelectIndex);
+        }else if(id == R.id.action_social_share){
+            Toast.makeText(getApplicationContext(), "Share Social", Toast.LENGTH_SHORT).show();
         }
+
+
         return super.onOptionsItemSelected(item);
     }
 

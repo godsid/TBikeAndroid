@@ -245,11 +245,18 @@ public class NavigationDrawerFragment extends Fragment {
             return true;
         }
 
-        if (item.getItemId() == R.id.action_example) {
-            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
+
+        //Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
+        /*
+        if (item.getItemId() == R.id.action_navigation_refresh) {
+            //Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
+           mDrawerToggle.onOptionsItemSelected(item);
+            return true;
+        }else if(item.getItemId() == R.id.action_social_share){
+            mDrawerToggle.onOptionsItemSelected(item);
             return true;
         }
-
+        */
         return super.onOptionsItemSelected(item);
     }
 
