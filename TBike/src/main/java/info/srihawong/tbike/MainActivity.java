@@ -45,6 +45,8 @@ public class MainActivity extends ActionBarActivity
      */
     private CharSequence mTitle;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +63,15 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+
+        if (checkPlayServices()) {
+
+
+        }
+
+        
+
     }
 
     @Override
@@ -109,6 +120,21 @@ public class MainActivity extends ActionBarActivity
         actionBar.setTitle(mTitle);
     }
 
+    private boolean checkPlayServices(){
+        //int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        /*if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
+                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            } else {
+                Log.i("tui", "This device is not supported.");
+
+                //finish();
+            }
+            return false;
+        }*/
+        return true;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
