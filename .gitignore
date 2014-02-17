@@ -2,3 +2,5 @@
 /.idea/workspace.xml
 .DS_Store
 /.project
+/.idea
+/.gradle

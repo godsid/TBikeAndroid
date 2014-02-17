@@ -35,9 +35,9 @@ public class DetailActivity extends Activity{
 
         progressDialog.show();
 
-
         webView = (WebView) findViewById(R.id.webView);
-        //WebSettings webSettings = webView.getSettings();
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setAppCacheEnabled(true);
 
         webViewClient = new WebViewClient(){
             @Override
@@ -64,6 +64,7 @@ public class DetailActivity extends Activity{
             }
 
             Log.d("tui", String.valueOf(apiUrl));
+
             webView.loadUrl(apiUrl);
         }
 
