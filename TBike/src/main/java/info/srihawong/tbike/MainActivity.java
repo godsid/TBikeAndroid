@@ -1,23 +1,24 @@
 package info.srihawong.tbike;
 
+
 import android.app.Activity;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.AsyncTask;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -90,6 +91,7 @@ public class MainActivity extends ActionBarActivity
         restoreActionBar();
     }
 
+
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         sectionSelectIndex = position;
@@ -114,6 +116,7 @@ public class MainActivity extends ActionBarActivity
     }
 
     public void restoreActionBar() {
+
         ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
@@ -190,6 +193,8 @@ public class MainActivity extends ActionBarActivity
         private String forumID ;
         private String topicID ;
         private Boolean isSticky;
+
+
         /**
          * Returns a new instance of this fragment for the given section
          * number.
@@ -303,16 +308,24 @@ public class MainActivity extends ActionBarActivity
                     }
                     topicListAdapter = new TopicListAdapter(getActivity().getBaseContext(),topicListItems);
                     topicListView.setAdapter(topicListAdapter);
+                    registerForContextMenu(topicListView);
+                    //getActivity().setContentView(topicListView);
 
                     topicListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                         @Override
                         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+
+                            topicID = topicListItems.get(position).getTopicId().toString();
+
+                             /*
+
                             Intent openDetail = new Intent(getActivity().getApplicationContext(),DetailActivity.class);
                             openDetail.putExtra("topic_id",topicListItems.get(position).getTopicId());
                             openDetail.putExtra("title",topicListItems.get(position).getTitle());
                             openDetail.putExtra("original",true);
                             startActivity(openDetail);
                             getActivity().overridePendingTransition(R.layout.transition_fromright,R.layout.transition_toleft);
+                               */
                             return false;
                         }
                     });
@@ -337,8 +350,26 @@ public class MainActivity extends ActionBarActivity
             TopicsJson topicsJson = new TopicsJson();
             topicsJson.execute();
 
-
             return rootView;
+        }
+
+        @Override
+        public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+            getActivity().getMenuInflater().inflate(R.menu.options,menu);
+            menu.setHeaderTitle(R.string.option_title);
+        }
+
+        @Override
+        public boolean onContextItemSelected(MenuItem item) {
+            if(item.getTitle().equals(getResources().getString(R.string.option_favorites))){
+
+                Toast.makeText(getView().getContext(),"Add "+R.string.option_favorites,Toast.LENGTH_LONG).show();
+            }else if(item.getTitle().equals(getResources().getString(R.string.option_openthaimtb))){
+                openDetailOnThaiMTB();
+            }
+
+            return super.onContextItemSelected(item);
+
         }
 
         @Override
@@ -350,6 +381,15 @@ public class MainActivity extends ActionBarActivity
 
         public void success(String result){
             Log.d("tui",result);
+        }
+
+        public void openDetailOnThaiMTB(){
+            Intent openDetail = new Intent(getActivity().getApplicationContext(),DetailActivity.class);
+            openDetail.putExtra("topic_id",Integer.valueOf(topicID));
+            //openDetail.putExtra("title",topicListItems.get(position).getTitle());
+            openDetail.putExtra("original",true);
+            startActivity(openDetail);
+            getActivity().overridePendingTransition(R.layout.transition_fromright,R.layout.transition_toleft);
         }
     }
 
