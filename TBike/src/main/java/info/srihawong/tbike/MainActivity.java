@@ -98,11 +98,13 @@ public class MainActivity extends ActionBarActivity
         position = position + 1;
         // update the main content by replacing fragments
 
-        if(position==3){
+        if(position==3){ //ซอยวัชรพล
             Intent openDetail = new Intent(getApplicationContext(),DetailActivity.class);
             openDetail.putExtra("topic_id",474812);
             startActivity(openDetail);
 
+        }else if(position==5){ //Favorite
+            this.openFavoritesActivity();
         }else{
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
@@ -359,11 +361,12 @@ public class MainActivity extends ActionBarActivity
             menu.setHeaderTitle(R.string.option_title);
         }
 
+        //Context Menu
         @Override
         public boolean onContextItemSelected(MenuItem item) {
             if(item.getTitle().equals(getResources().getString(R.string.option_favorites))){
 
-                Toast.makeText(getView().getContext(),"Add "+R.string.option_favorites,Toast.LENGTH_LONG).show();
+                Toast.makeText(getView().getContext(),"Add "+getResources().getString(R.string.option_favorites),Toast.LENGTH_LONG).show();
             }else if(item.getTitle().equals(getResources().getString(R.string.option_openthaimtb))){
                 openDetailOnThaiMTB();
             }
@@ -383,7 +386,7 @@ public class MainActivity extends ActionBarActivity
             Log.d("tui",result);
         }
 
-        public void openDetailOnThaiMTB(){
+        private void openDetailOnThaiMTB(){
             Intent openDetail = new Intent(getActivity().getApplicationContext(),DetailActivity.class);
             openDetail.putExtra("topic_id",Integer.valueOf(topicID));
             //openDetail.putExtra("title",topicListItems.get(position).getTitle());
@@ -391,6 +394,15 @@ public class MainActivity extends ActionBarActivity
             startActivity(openDetail);
             getActivity().overridePendingTransition(R.layout.transition_fromright,R.layout.transition_toleft);
         }
-    }
 
+
+    }
+    // End PlaceholderFragment class
+
+    private void  openFavoritesActivity(){
+        Intent openFavorites = new Intent(getApplicationContext(),FavoritesActivity.class);
+        startActivity(openFavorites);
+        overridePendingTransition(R.layout.transition_fromright,R.layout.transition_toleft);
+    }
 }
+// End MainActivity class
