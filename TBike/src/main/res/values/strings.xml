@@ -16,6 +16,8 @@
     <string name="api_topic">http://srihawong.info/app/tmb/topic.php</string>
     <string name="api_topic_original">http://www.thaimtb.com/forum/viewtopic.php</string>
 
+    <string name="database_name">tbike.db</string>
+
     <string-array name="title_section">
         <item>กระดานข่าว</item>
         <item>ซื้อขาย</item>

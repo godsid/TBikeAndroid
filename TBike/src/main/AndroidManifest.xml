@@ -10,6 +10,10 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="info.srihawong.tbike.permission.C2D_MESSAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
 
     <permission
         android:name="info.srihawong.tbike.permission.C2D_MESSAGE"
@@ -31,6 +35,7 @@
         </activity>
         <activity android:name="info.srihawong.tbike.DetailActivity" />
 
+        <!--
         <receiver
             android:name="info.srihawong.tbike.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
@@ -42,11 +47,12 @@
         </receiver>
 
         <service android:name="info.srihawong.tbike.GcmIntentService" />
-
+        -->
         <activity
             android:name="info.srihawong.tbike.FavoritesActivity"
             android:label="@string/title_activity_favorites" >
         </activity>
-    </application>
 
+    </application>
+    <uses-feature android:name="database_name">tbile.db</uses-feature>
 </manifest>

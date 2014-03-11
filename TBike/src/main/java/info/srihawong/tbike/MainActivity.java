@@ -240,7 +240,6 @@ public class MainActivity extends ActionBarActivity
             topicID = getArguments().getString(ARG_SECTION_TOPIC_ID,null);
             isSticky = getArguments().getBoolean(ARG_SECTION_STICKY, false);
 
-
             class TopicsJson extends AsyncTask<String, Integer, Long>{
                 private JSONObject resultTopicJSON;
                 //private ProgressDialog progressDialog = new ProgressDialog();
@@ -256,8 +255,6 @@ public class MainActivity extends ActionBarActivity
                     progressDialog.setMessage("กำลังโหดอยู่รอซักครู่");
                               */
                     //super.onPreExecute();
-
-
                 }
 
 

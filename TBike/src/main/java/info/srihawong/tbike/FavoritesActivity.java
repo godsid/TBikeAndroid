@@ -4,6 +4,9 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
+
+import java.util.ArrayList;
 
 
 public class FavoritesActivity extends ActionBarActivity {
@@ -12,6 +15,18 @@ public class FavoritesActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorites);
+
+        ListView favoritesListView = (ListView) findViewById(R.id.favoriteslistView);
+
+        ArrayList<TopicListItem> favoritesListItems = new ArrayList<TopicListItem>();
+
+        favoritesListItems.add(new TopicListItem(1,"tui","title","to day"));
+
+        TopicListAdapter topicListAdapter = new TopicListAdapter(getBaseContext(),favoritesListItems);
+        favoritesListView.setAdapter(topicListAdapter);
+        registerForContextMenu(favoritesListView);
+
+
     }
 
 
