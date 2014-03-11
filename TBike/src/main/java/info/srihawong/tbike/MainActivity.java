@@ -195,8 +195,7 @@ public class MainActivity extends ActionBarActivity
         private String forumID ;
         private String topicID ;
         private Boolean isSticky;
-
-
+        private FavoritesDB favoritesDB;
         /**
          * Returns a new instance of this fragment for the given section
          * number.
@@ -239,6 +238,8 @@ public class MainActivity extends ActionBarActivity
             forumID = getArguments().getString(ARG_SECTION_FORUM_ID);
             topicID = getArguments().getString(ARG_SECTION_TOPIC_ID,null);
             isSticky = getArguments().getBoolean(ARG_SECTION_STICKY, false);
+
+            favoritesDB = new FavoritesDB(rootView.getContext());
 
             class TopicsJson extends AsyncTask<String, Integer, Long>{
                 private JSONObject resultTopicJSON;
@@ -315,7 +316,6 @@ public class MainActivity extends ActionBarActivity
                         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
                             topicID = topicListItems.get(position).getTopicId().toString();
-
                              /*
 
                             Intent openDetail = new Intent(getActivity().getApplicationContext(),DetailActivity.class);
@@ -355,15 +355,32 @@ public class MainActivity extends ActionBarActivity
         @Override
         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
             getActivity().getMenuInflater().inflate(R.menu.options,menu);
+            Util.Log(String.valueOf(topicID));
+
+            if(favoritesDB.isFavorite(topicID)) {
+                menu.findItem(R.id.option_favorite).setTitle(R.string.option_remove_favorites);
+            }else{
+                menu.findItem(R.id.option_favorite).setTitle(R.string.option_add_favorites);
+            }
             menu.setHeaderTitle(R.string.option_title);
         }
 
         //Context Menu
         @Override
         public boolean onContextItemSelected(MenuItem item) {
-            if(item.getTitle().equals(getResources().getString(R.string.option_favorites))){
+            if(item.getTitle().equals(getResources().getString(R.string.option_add_favorites))){
+                /*
+                try {
+                    long insertID = favoritesDB.add(Integer.getInteger(forumID),Integer.getInteger(topicID),"title", (long) 0);
+                    Util.Log(String.valueOf(insertID));
+                }catch (Exception e){
+                    Util.Log(e.getMessage().toString());
+                }*/
 
                 Toast.makeText(getView().getContext(),"Add "+getResources().getString(R.string.option_favorites),Toast.LENGTH_LONG).show();
+
+            }else if(item.getTitle().equals(getResources().getString(R.string.option_remove_favorites))){
+
             }else if(item.getTitle().equals(getResources().getString(R.string.option_openthaimtb))){
                 openDetailOnThaiMTB();
             }
@@ -391,7 +408,6 @@ public class MainActivity extends ActionBarActivity
             startActivity(openDetail);
             getActivity().overridePendingTransition(R.layout.transition_fromright,R.layout.transition_toleft);
         }
-
 
     }
     // End PlaceholderFragment class

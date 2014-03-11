@@ -2,6 +2,7 @@ package info.srihawong.tbike;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -43,8 +44,19 @@ public class FavoritesDB {
         dbHelper = new FavoritesDBHelper(context,DATABASE_NAME,null,DATABASE_VERSION);
         db = dbHelper.getReadableDatabase();
     }
+    public Boolean isFavorite(String topicID){
+        db = dbHelper.getReadableDatabase();
+        Cursor rs = db.rawQuery("SELECT * FROM "+TABLE_NAME+" WHERE "+COLUMN_TOPIC_ID+" = "+ topicID,null);
+        if(rs.getCount()>0){
+            return true;
+        }else{
+            return false;
+        }
+    }
 
     public int add(int forumID, int topicID,String title,Long topicCreateTimestamp){
+        db = dbHelper.getWritableDatabase();
+
         ContentValues values = new ContentValues();
         values.put(COLUMN_FORUM_ID,forumID);
         values.put(COLUMN_TOPIC_ID,topicID);
