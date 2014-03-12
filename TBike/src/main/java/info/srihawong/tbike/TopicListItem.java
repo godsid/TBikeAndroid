@@ -7,22 +7,49 @@ public class TopicListItem {
     private String username;
     private String title;
     private String createDate;
-    private Integer topicId;
+    private int topicId,forumId,userId;
+    private int sticky;
 
-    public TopicListItem(Integer topicId, String username, String title, String createDate) {
+    public TopicListItem(int forumId, int topicId, int userId, String username, String title, String createDate,int sticky) {
         this.username = username;
         this.title = title;
         this.createDate = createDate;
         this.topicId = topicId;
-
+        this.forumId = forumId;
+        this.userId = userId;
+        this.sticky = sticky;
     }
 
-    public Integer getTopicId() {
+
+    public int getTopicId() {
         return topicId;
     }
 
-    public void setTopicId(Integer topicId) {
+    public int getForumId() {
+        return forumId;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setTopicId(int topicId) {
         this.topicId = topicId;
+    }
+
+    public void setForumId(int forumId) {
+        this.forumId = forumId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+    public int getSticky() {
+        return sticky;
+    }
+
+    public void setSticky(int sticky) {
+        this.sticky = sticky;
     }
 
     public String getUsername() {

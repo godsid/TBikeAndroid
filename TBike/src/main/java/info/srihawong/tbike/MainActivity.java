@@ -3,7 +3,7 @@ package info.srihawong.tbike;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.res.Resources;
+
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -15,7 +15,7 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
+
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +28,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
+
 import java.util.ArrayList;
+
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -70,9 +73,6 @@ public class MainActivity extends ActionBarActivity
 
 
         }
-
-        
-
     }
 
     @Override
@@ -191,6 +191,8 @@ public class MainActivity extends ActionBarActivity
         private ProgressBar progressBar;
         private ArrayList<TopicListItem> topicListItems = new ArrayList<TopicListItem>();
         private TopicListAdapter topicListAdapter;
+        private TopicListItem chooseTopicItem;
+
 
         private String forumID ;
         private String topicID ;
@@ -239,7 +241,11 @@ public class MainActivity extends ActionBarActivity
             topicID = getArguments().getString(ARG_SECTION_TOPIC_ID,null);
             isSticky = getArguments().getBoolean(ARG_SECTION_STICKY, false);
 
+
+
             favoritesDB = new FavoritesDB(rootView.getContext());
+
+
 
             class TopicsJson extends AsyncTask<String, Integer, Long>{
                 private JSONObject resultTopicJSON;
@@ -289,22 +295,35 @@ public class MainActivity extends ActionBarActivity
 
                     try {
                         JSONArray resultTopicArray = resultTopicJSON.getJSONArray("result");
+
                         if (resultTopicArray.length()>0) {
                             topicListItems.clear();
-                            for(Integer i=0,j=resultTopicArray.length();i<j;i++){
+
+                            for(int i=0,j=resultTopicArray.length();i<j;i++){
                                 if(!isSticky && resultTopicArray.getJSONObject(i).getInt("sticky")==1){
                                     continue;
                                 }
+
+
                                 topicListItems.add(new TopicListItem(
+                                        resultTopicArray.getJSONObject(i).getInt("f_id"),
                                         resultTopicArray.getJSONObject(i).getInt("topic_id"),
+                                        resultTopicArray.getJSONObject(i).getInt("user_id"),
                                         resultTopicArray.getJSONObject(i).getString("user_name"),
                                         resultTopicArray.getJSONObject(i).getString("title"),
-                                        resultTopicArray.getJSONObject(i).getString("createdate")));
+                                        resultTopicArray.getJSONObject(i).getString("createdate"),
+                                        resultTopicArray.getJSONObject(i).getInt("sticky")
+                                        ));
+
                             }
+
                         }
 
                     } catch (JSONException e) {
-                        e.printStackTrace();
+
+                        Util.Log(e.getMessage());
+
+
                     }
                     topicListAdapter = new TopicListAdapter(getActivity().getBaseContext(),topicListItems);
                     topicListView.setAdapter(topicListAdapter);
@@ -315,7 +334,8 @@ public class MainActivity extends ActionBarActivity
                         @Override
                         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
-                            topicID = topicListItems.get(position).getTopicId().toString();
+                            chooseTopicItem = topicListItems.get(position);
+                            //topicID = chooseTopicItem.getTopicId().toString();
                              /*
 
                             Intent openDetail = new Intent(getActivity().getApplicationContext(),DetailActivity.class);
@@ -332,9 +352,10 @@ public class MainActivity extends ActionBarActivity
                     topicListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                            chooseTopicItem  = topicListItems.get(position);
                             Intent openDetail = new Intent(getActivity().getApplicationContext(),DetailActivity.class);
-                            openDetail.putExtra("topic_id",topicListItems.get(position).getTopicId());
-                            openDetail.putExtra("title",topicListItems.get(position).getTitle());
+                            openDetail.putExtra("topic_id",chooseTopicItem.getTopicId());
+                            openDetail.putExtra("title",chooseTopicItem.getTitle());
                             startActivity(openDetail);
                             getActivity().overridePendingTransition(R.layout.transition_fromright,R.layout.transition_toleft);
                         }
@@ -355,9 +376,7 @@ public class MainActivity extends ActionBarActivity
         @Override
         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
             getActivity().getMenuInflater().inflate(R.menu.options,menu);
-            Util.Log(String.valueOf(topicID));
-
-            if(favoritesDB.isFavorite(topicID)) {
+            if(favoritesDB.isFavorite(String.valueOf(chooseTopicItem.getTopicId()))) {
                 menu.findItem(R.id.option_favorite).setTitle(R.string.option_remove_favorites);
             }else{
                 menu.findItem(R.id.option_favorite).setTitle(R.string.option_add_favorites);
@@ -368,7 +387,11 @@ public class MainActivity extends ActionBarActivity
         //Context Menu
         @Override
         public boolean onContextItemSelected(MenuItem item) {
-            if(item.getTitle().equals(getResources().getString(R.string.option_add_favorites))){
+            String itemTitle = item.getTitle().toString();
+
+            if(itemTitle.equals(getResources().getString(R.string.option_add_favorites))){
+
+               favoritesDB.add(chooseTopicItem.getForumId(),chooseTopicItem.getTopicId(),chooseTopicItem.getUserId(),chooseTopicItem.getUsername(),chooseTopicItem.getTitle(),chooseTopicItem.getSticky(),chooseTopicItem.getCreateDate());
                 /*
                 try {
                     long insertID = favoritesDB.add(Integer.getInteger(forumID),Integer.getInteger(topicID),"title", (long) 0);
@@ -377,11 +400,13 @@ public class MainActivity extends ActionBarActivity
                     Util.Log(e.getMessage().toString());
                 }*/
 
-                Toast.makeText(getView().getContext(),"Add "+getResources().getString(R.string.option_favorites),Toast.LENGTH_LONG).show();
+                Toast.makeText(getView().getContext(),getResources().getString(R.string.option_add_favorites),Toast.LENGTH_LONG).show();
 
-            }else if(item.getTitle().equals(getResources().getString(R.string.option_remove_favorites))){
+            }else if(itemTitle.equals(getResources().getString(R.string.option_remove_favorites))){
+                favoritesDB.delete(chooseTopicItem.getTopicId());
+                Toast.makeText(getView().getContext(),getResources().getString(R.string.option_remove_favorites),Toast.LENGTH_LONG).show();
 
-            }else if(item.getTitle().equals(getResources().getString(R.string.option_openthaimtb))){
+            }else if(itemTitle.equals(getResources().getString(R.string.option_openthaimtb))){
                 openDetailOnThaiMTB();
             }
 

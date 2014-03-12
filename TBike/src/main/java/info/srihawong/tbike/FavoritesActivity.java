@@ -20,7 +20,7 @@ public class FavoritesActivity extends ActionBarActivity {
 
         ArrayList<TopicListItem> favoritesListItems = new ArrayList<TopicListItem>();
 
-        favoritesListItems.add(new TopicListItem(1,"tui","title","to day"));
+        //favoritesListItems.add(new TopicListItem(1,"tui","title","to day"));
 
         TopicListAdapter topicListAdapter = new TopicListAdapter(getBaseContext(),favoritesListItems);
         favoritesListView.setAdapter(topicListAdapter);
