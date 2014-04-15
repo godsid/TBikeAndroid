@@ -10,9 +10,15 @@
     <string name="action_about">About</string>
     <string name="action_refresh">Refresh</string>
 
-    <!-- <string name="api_forum">http://192.168.56.1/app/tmb/forum.php</string> -->
+    <string name="refresh_completed">Refresh Completed</string>
+
+    <string name="api_forum">http://192.168.56.1/app/tmb/forum.php</string>
+    <string name="api_topic">http://192.168.56.1/app/tmb/topic.php</string>
+
+    <!--
     <string name="api_forum">http://srihawong.info/app/tmb/forum.php</string>
     <string name="api_topic">http://srihawong.info/app/tmb/topic.php</string>
+    -->
     <string name="api_topic_original">http://www.thaimtb.com/forum/viewtopic.php</string>
 
     <!-- Context menu Main Activity -->

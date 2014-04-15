@@ -14,51 +14,38 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
-public class FavoritesActivity extends ActionBarActivity {
+
+public class FavoritesActivity extends ActionBarActivity implements OnRefreshListener {
 
     FavoritesDB favoritesDB;
     ArrayList<TopicListItem> favoritesListItems;
     TopicListAdapter topicListAdapter;
     ListView favoritesListView;
     int chooseItem;
+    private PullToRefreshLayout mPullToRefreshLayout;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorites);
+        mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.layout_favorite);
+        ActionBarPullToRefresh.from(this)
+                .allChildrenArePullable()
+                .listener(this)
+                .setup(mPullToRefreshLayout);
 
         favoritesListView = (ListView) findViewById(R.id.favoriteslistView);
-
         setTitle(R.string.title_activity_favorites);
-
         favoritesListItems = new ArrayList<TopicListItem>();
-
         favoritesDB = new FavoritesDB(getApplicationContext());
-
-        ArrayList<FaviriteData> faviriteDatas =  favoritesDB.getLimit(10,0);
-
-        for (int i=0;i< faviriteDatas.size();i++ ){
-
-            favoritesListItems.add(new TopicListItem(
-                    Integer.valueOf(faviriteDatas.get(i).getForum_id()),
-                    Integer.valueOf(faviriteDatas.get(i).getTopic_id()),
-                    Integer.valueOf(faviriteDatas.get(i).getUser_id()),
-                    faviriteDatas.get(i).getUsername(),
-                    faviriteDatas.get(i).getTitle(),
-                    faviriteDatas.get(i).getTopic_create_time(),
-                    Integer.valueOf(faviriteDatas.get(i).getSticky())
-                    ));
-        }
-
-        //favoritesListItems.add(new TopicListItem(1,"tui","title","to day"));
-
         topicListAdapter = new TopicListAdapter(getBaseContext(),favoritesListItems);
         favoritesListView.setAdapter(topicListAdapter);
         registerForContextMenu(favoritesListView);
-
-
 
         favoritesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -77,10 +64,29 @@ public class FavoritesActivity extends ActionBarActivity {
                 return false;
             }
         });
-
-
+        getFavorites();
     }
 
+    private void getFavorites(){
+        ArrayList<FaviriteData> faviriteDatas =  favoritesDB.getLimit(10,0);
+        favoritesListItems.clear();
+        for (int i=0,j = faviriteDatas.size();i < j;i++ ){
+            favoritesListItems.add(new TopicListItem(
+                    Integer.valueOf(faviriteDatas.get(i).getForum_id()),
+                    Integer.valueOf(faviriteDatas.get(i).getTopic_id()),
+                    Integer.valueOf(faviriteDatas.get(i).getUser_id()),
+                    faviriteDatas.get(i).getUsername(),
+                    faviriteDatas.get(i).getTitle(),
+                    faviriteDatas.get(i).getTopic_create_time(),
+                    Integer.valueOf(faviriteDatas.get(i).getSticky())
+            ));
+        }
+        topicListAdapter.notifyDataSetChanged();
+        if(mPullToRefreshLayout.isRefreshing()){
+            mPullToRefreshLayout.setRefreshComplete();
+        }
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -135,5 +141,10 @@ public class FavoritesActivity extends ActionBarActivity {
     public void onBackPressed() {
         super.onBackPressed();
         overridePendingTransition(R.layout.transition_fromleft, R.layout.transition_toright);
+    }
+
+    @Override
+    public void onRefreshStarted(View view) {
+        getFavorites();
     }
 }

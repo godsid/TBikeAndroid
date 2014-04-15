@@ -12,11 +12,20 @@ import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.support.v7.app.ActionBarActivity;
+import android.widget.Toast;
+
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 /**
  * Created by Banpot.S on 10/1/2557.
  */
-public class DetailActivity extends Activity{
+public class DetailActivity extends ActionBarActivity implements OnRefreshListener{
+
+    private PullToRefreshLayout mPullToRefreshLayout;
+
     WebView webView;
     ProgressDialog progressDialog;
     WebViewClient webViewClient;
@@ -25,6 +34,12 @@ public class DetailActivity extends Activity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+
+        mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.layout_detail);
+        ActionBarPullToRefresh.from(this)
+                .allChildrenArePullable()
+                .listener(this)
+                .setup(mPullToRefreshLayout);
 
         progressDialog = new ProgressDialog(DetailActivity.this,R.style.TransparentProgressDialog);
         progressDialog.setIndeterminate(true);
@@ -45,8 +60,15 @@ public class DetailActivity extends Activity{
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 progressDialog.dismiss();
+
+                // If the PullToRefreshAttacher is refreshing, make it as complete
+                if (mPullToRefreshLayout.isRefreshing()) {
+                    mPullToRefreshLayout.setRefreshComplete();
+                    Toast.makeText(getApplicationContext(),R.string.refresh_completed,Toast.LENGTH_LONG);
+                }
             }
         };
+
 
         webView.setWebViewClient(webViewClient);
 
@@ -69,6 +91,11 @@ public class DetailActivity extends Activity{
             webView.loadUrl(apiUrl);
         }
 
+    }
+
+    @Override
+    public void onRefreshStarted(View view) {
+        webView.reload();
     }
 
     @Override
