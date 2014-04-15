@@ -34,7 +34,11 @@
             </intent-filter>
         </activity>
         <activity android:name="info.srihawong.tbike.DetailActivity" />
-
+        <activity android:name="info.srihawong.tbike.AboutActivity" />
+        <activity
+            android:name="info.srihawong.tbike.FavoritesActivity"
+            android:label="@string/title_activity_favorites" >
+        </activity>
         <!--
         <receiver
             android:name="info.srihawong.tbike.GcmBroadcastReceiver"
@@ -48,10 +52,7 @@
 
         <service android:name="info.srihawong.tbike.GcmIntentService" />
         -->
-        <activity
-            android:name="info.srihawong.tbike.FavoritesActivity"
-            android:label="@string/title_activity_favorites" >
-        </activity>
+
 
     </application>
     <uses-feature android:name="database_name">tbile.db</uses-feature>

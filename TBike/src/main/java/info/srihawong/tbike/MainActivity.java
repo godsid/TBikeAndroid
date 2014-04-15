@@ -11,6 +11,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -20,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -169,6 +172,7 @@ public class MainActivity extends ActionBarActivity
         }else if(id == R.id.action_about){
             Intent aboutIntent = new Intent(getApplicationContext(),AboutActivity.class);
             startActivity(aboutIntent);
+            return true;
         }else if(id == R.id.action_refresh || id == R.id.action_navigation_refresh){
             onNavigationDrawerItemSelected(sectionSelectIndex);
         }else if(id == R.id.action_social_share){
@@ -194,6 +198,7 @@ public class MainActivity extends ActionBarActivity
         private static final String ARG_SECTION_STICKY = "sticky";
         private ListView topicListView;
         private ProgressBar progressBar;
+        private EditText searchText;
         private ArrayList<TopicListItem> topicListItems = new ArrayList<TopicListItem>();
         private TopicListAdapter topicListAdapter;
         private TopicListItem chooseTopicItem;
@@ -245,7 +250,7 @@ public class MainActivity extends ActionBarActivity
 
             ActionBarPullToRefresh.from(getActivity())
                     .insertLayoutInto(viewGroup)
-                    .theseChildrenArePullable(R.id.progressBar,R.id.topicListView, android.R.id.empty)
+                    .theseChildrenArePullable(R.id.progressBar, R.id.topicListView, android.R.id.empty)
                     .listener(this)
                     .setup(mPullToRefreshLayout);
 
@@ -258,15 +263,43 @@ public class MainActivity extends ActionBarActivity
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             topicListView = (ListView) rootView.findViewById(R.id.topicListView);
             progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
+            searchText = (EditText) rootView.findViewById(R.id.listview_search);
             forumID = getArguments().getString(ARG_SECTION_FORUM_ID);
             topicID = getArguments().getString(ARG_SECTION_TOPIC_ID,null);
             isSticky = getArguments().getBoolean(ARG_SECTION_STICKY, false);
-
             favoritesDB = new FavoritesDB(rootView.getContext());
             loadData();
+
+            searchText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+
+                }
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+                   searchData();
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+
+                }
+            });
+
             return rootView;
         }
 
+        private void searchData(){
+            ArrayList<TopicListItem> searchTopicItems = new ArrayList<TopicListItem>();
+            for(int j=0,k=topicListItems.size();j<k;j++){
+                if(topicListItems.get(j).getTitle().contains(searchText.getText().toString().trim())){
+                    searchTopicItems.add(topicListItems.get(j));
+                }
+            }
+            topicListAdapter = new TopicListAdapter(getActivity().getBaseContext(),searchTopicItems);
+            topicListView.setAdapter(topicListAdapter);
+            topicListAdapter.notifyDataSetChanged();
+        }
 
         private void loadData(){
             class TopicsJson extends AsyncTask<String, Integer, Long>{
@@ -444,7 +477,7 @@ public class MainActivity extends ActionBarActivity
         private void openDetailOnThaiMTB(){
             Intent openDetail = new Intent(getActivity().getApplicationContext(),DetailActivity.class);
             openDetail.putExtra("topic_id",Integer.valueOf(topicID));
-            //openDetail.putExtra("title",topicListItems.get(position).getTitle());
+            openDetail.putExtra("title",chooseTopicItem.getTitle());
             openDetail.putExtra("original",true);
             startActivity(openDetail);
             getActivity().overridePendingTransition(R.layout.transition_fromright,R.layout.transition_toleft);

@@ -170,16 +170,17 @@ public class FavoritesDB {
     }
 
     public int update(){
-
-
-
         return 1;
     }
 
-    public ArrayList<FaviriteData> getLimit(int limit,int offset){
+    public ArrayList<FaviriteData> getLimit(String search ,int limit,int offset){
         ArrayList<FaviriteData> listItems = new ArrayList<FaviriteData>();
+        String where = "";
         db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM "+TABLE_NAME+ " ORDER BY ID DESC LIMIT "+String.valueOf(offset)+","+String.valueOf(limit),null);
+        if(!search.isEmpty()){
+            where = " WHERE "+COLUMN_TITLE +" LIKE '%"+search.trim()+"%' ";
+        }
+        Cursor cursor = db.rawQuery("SELECT * FROM "+TABLE_NAME+ " "+where+" ORDER BY ID DESC LIMIT "+String.valueOf(offset)+","+String.valueOf(limit),null);
 
         if(cursor!=null){
             if(cursor.moveToFirst()){
@@ -193,8 +194,9 @@ public class FavoritesDB {
         //ContentValues values = new ContentValues();
         return listItems;
         //Log.d("tui", rs.getColumnNames().toString());
-
-
+    }
+    public ArrayList<FaviriteData> getLimit(int limit,int offset){
+           return getLimit("",limit,offset);
     }
 
 

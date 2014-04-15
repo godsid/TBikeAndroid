@@ -2,6 +2,7 @@ package info.srihawong.tbike;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -112,13 +113,18 @@ public class DetailActivity extends ActionBarActivity implements OnRefreshListen
 
     @Override
     public void onBackPressed() {
-        //super.onBackPressed();
-        if(webView.getUrl().matches(".*&p=[0-9]+")){
-            webView.goBack();
-        }else {
+        try {
+            if (webView.getUrl().matches(".*&p=[0-9]+")) {
+                webView.goBack();
+            } else {
+                super.onBackPressed();
+                overridePendingTransition(R.layout.transition_fromleft, R.layout.transition_toright);
+            }
+        }catch (Exception e){
             super.onBackPressed();
             overridePendingTransition(R.layout.transition_fromleft, R.layout.transition_toright);
         }
+
     }
 
     @Override
@@ -134,6 +140,14 @@ public class DetailActivity extends ActionBarActivity implements OnRefreshListen
         if(id == R.id.action_refresh){
             progressDialog.show();
             webView.reload();
+        }else if(id == R.id.action_social_share){
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_SUBJECT, "TBike Share");
+            sendIntent.putExtra(Intent.EXTRA_TEXT,getIntent().getStringExtra("title")+" "+ getString(R.string.api_topic_original)+"?t="+String.valueOf(getIntent().getIntExtra("topic_id",0)));
+            sendIntent.setType("text/plain");
+            startActivity(Intent.createChooser(sendIntent, getResources().getString(R.string.share_title)));
+
         }
         return super.onOptionsItemSelected(item);
     }

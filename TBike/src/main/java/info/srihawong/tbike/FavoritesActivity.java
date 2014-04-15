@@ -3,12 +3,15 @@ package info.srihawong.tbike;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -19,26 +22,22 @@ import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 
-public class FavoritesActivity extends ActionBarActivity implements OnRefreshListener {
+public class FavoritesActivity extends ActionBarActivity {
 
-    FavoritesDB favoritesDB;
-    ArrayList<TopicListItem> favoritesListItems;
-    TopicListAdapter topicListAdapter;
-    ListView favoritesListView;
-    int chooseItem;
-    private PullToRefreshLayout mPullToRefreshLayout;
+    private FavoritesDB favoritesDB;
+    private ArrayList<TopicListItem> favoritesListItems;
+    private TopicListAdapter topicListAdapter;
+    private EditText searchText;
+    private ListView favoritesListView;
+    private int chooseItem;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorites);
-        mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.layout_favorite);
-        ActionBarPullToRefresh.from(this)
-                .allChildrenArePullable()
-                .listener(this)
-                .setup(mPullToRefreshLayout);
 
+        searchText = (EditText) findViewById(R.id.listview_search);
         favoritesListView = (ListView) findViewById(R.id.favoriteslistView);
         setTitle(R.string.title_activity_favorites);
         favoritesListItems = new ArrayList<TopicListItem>();
@@ -64,11 +63,28 @@ public class FavoritesActivity extends ActionBarActivity implements OnRefreshLis
                 return false;
             }
         });
+
+        searchText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+                getFavorites(searchText.getText().toString().trim());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
         getFavorites();
     }
 
-    private void getFavorites(){
-        ArrayList<FaviriteData> faviriteDatas =  favoritesDB.getLimit(10,0);
+    private void getFavorites(String search){
+        ArrayList<FaviriteData> faviriteDatas =  favoritesDB.getLimit(search,10,0);
         favoritesListItems.clear();
         for (int i=0,j = faviriteDatas.size();i < j;i++ ){
             favoritesListItems.add(new TopicListItem(
@@ -82,10 +98,10 @@ public class FavoritesActivity extends ActionBarActivity implements OnRefreshLis
             ));
         }
         topicListAdapter.notifyDataSetChanged();
-        if(mPullToRefreshLayout.isRefreshing()){
-            mPullToRefreshLayout.setRefreshComplete();
-        }
 
+    }
+    private void getFavorites(){
+        getFavorites("");
     }
 
     @Override
@@ -143,8 +159,4 @@ public class FavoritesActivity extends ActionBarActivity implements OnRefreshLis
         overridePendingTransition(R.layout.transition_fromleft, R.layout.transition_toright);
     }
 
-    @Override
-    public void onRefreshStarted(View view) {
-        getFavorites();
-    }
 }
