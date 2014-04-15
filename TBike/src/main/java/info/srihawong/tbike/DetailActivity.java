@@ -38,6 +38,7 @@ public class DetailActivity extends Activity{
         webView = (WebView) findViewById(R.id.webView);
         WebSettings webSettings = webView.getSettings();
         webSettings.setAppCacheEnabled(true);
+        //webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
 
         webViewClient = new WebViewClient(){
             @Override
