@@ -67,10 +67,21 @@ public class DetailActivity extends ActionBarActivity implements OnRefreshListen
                     Toast.makeText(getApplicationContext(),R.string.refresh_completed,Toast.LENGTH_LONG);
                 }
             }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+
+                if(url.matches(".*&p=[0-9]+")){
+                    progressDialog.show();
+                }
+                return super.shouldOverrideUrlLoading(view, url);
+            }
         };
 
 
         webView.setWebViewClient(webViewClient);
+        webView.canGoBack();
+        webView.canGoForward();
 
         Integer topicId = getIntent().getIntExtra("topic_id",0);
         Boolean isOriginal = getIntent().getBooleanExtra("original",false);
@@ -95,14 +106,19 @@ public class DetailActivity extends ActionBarActivity implements OnRefreshListen
 
     @Override
     public void onRefreshStarted(View view) {
+        progressDialog.show();
         webView.reload();
     }
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-
-        overridePendingTransition(R.layout.transition_fromleft, R.layout.transition_toright);
+        //super.onBackPressed();
+        if(webView.getUrl().matches(".*&p=[0-9]+")){
+            webView.goBack();
+        }else {
+            super.onBackPressed();
+            overridePendingTransition(R.layout.transition_fromleft, R.layout.transition_toright);
+        }
     }
 
     @Override
