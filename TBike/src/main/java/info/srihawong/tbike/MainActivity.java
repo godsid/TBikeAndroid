@@ -32,6 +32,10 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
+
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -59,6 +63,7 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
 
+
         sectionArray =  getResources().getStringArray(R.array.title_section);
 
         mTitle = getTitle();
@@ -70,7 +75,6 @@ public class MainActivity extends ActionBarActivity
 
 
         if (checkPlayServices()) {
-
 
         }
     }
@@ -175,10 +179,11 @@ public class MainActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
+
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class PlaceholderFragment extends Fragment implements OnRefreshListener{
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -193,6 +198,7 @@ public class MainActivity extends ActionBarActivity
         private TopicListAdapter topicListAdapter;
         private TopicListItem chooseTopicItem;
 
+        private PullToRefreshLayout mPullToRefreshLayout;
 
         private String forumID ;
         private String topicID ;
@@ -231,6 +237,21 @@ public class MainActivity extends ActionBarActivity
         }
 
         @Override
+        public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+
+            ViewGroup viewGroup = (ViewGroup) view;
+            mPullToRefreshLayout = new PullToRefreshLayout(viewGroup.getContext());
+
+            ActionBarPullToRefresh.from(getActivity())
+                    .insertLayoutInto(viewGroup)
+                    .theseChildrenArePullable(R.id.progressBar,R.id.topicListView, android.R.id.empty)
+                    .listener(this)
+                    .setup(mPullToRefreshLayout);
+
+        }
+
+        @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
 
@@ -241,30 +262,20 @@ public class MainActivity extends ActionBarActivity
             topicID = getArguments().getString(ARG_SECTION_TOPIC_ID,null);
             isSticky = getArguments().getBoolean(ARG_SECTION_STICKY, false);
 
-
-
             favoritesDB = new FavoritesDB(rootView.getContext());
+            loadData();
+            return rootView;
+        }
 
 
-
+        private void loadData(){
             class TopicsJson extends AsyncTask<String, Integer, Long>{
                 private JSONObject resultTopicJSON;
                 //private ProgressDialog progressDialog = new ProgressDialog();
                 @Override
                 protected void onPreExecute() {
                     progressBar.setVisibility(View.VISIBLE);
-
-                    //MainActivity.this
-                    //ProgressDialog.show(get, "title", "message");
-                   /* progressDialog.setMax(100);
-                    progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    progressDialog.setTitle("Loading...");
-                    progressDialog.setMessage("กำลังโหดอยู่รอซักครู่");
-                              */
-                    //super.onPreExecute();
                 }
-
-
 
                 @Override
                 protected Long doInBackground(String... strings) {
@@ -304,7 +315,6 @@ public class MainActivity extends ActionBarActivity
                                     continue;
                                 }
 
-
                                 topicListItems.add(new TopicListItem(
                                         resultTopicArray.getJSONObject(i).getInt("f_id"),
                                         resultTopicArray.getJSONObject(i).getInt("topic_id"),
@@ -313,10 +323,8 @@ public class MainActivity extends ActionBarActivity
                                         resultTopicArray.getJSONObject(i).getString("title"),
                                         resultTopicArray.getJSONObject(i).getString("createdate"),
                                         resultTopicArray.getJSONObject(i).getInt("sticky")
-                                        ));
-
+                                ));
                             }
-
                         }
 
                     } catch (JSONException e) {
@@ -362,15 +370,14 @@ public class MainActivity extends ActionBarActivity
                     });
                     progressBar.setVisibility(View.INVISIBLE);
                     //progressDialog.dismiss();
-
+                    if(mPullToRefreshLayout.isRefreshing()){
+                        mPullToRefreshLayout.setRefreshComplete();
+                    }
                 }
             }
 
-
             TopicsJson topicsJson = new TopicsJson();
             topicsJson.execute();
-
-            return rootView;
         }
 
         @Override
@@ -425,6 +432,11 @@ public class MainActivity extends ActionBarActivity
             }
         }
 
+        @Override
+        public void onRefreshStarted(View view) {
+            loadData();
+        }
+
         public void success(String result){
             Log.d("tui",result);
         }
@@ -437,6 +449,8 @@ public class MainActivity extends ActionBarActivity
             startActivity(openDetail);
             getActivity().overridePendingTransition(R.layout.transition_fromright,R.layout.transition_toleft);
         }
+
+
 
     }
     // End PlaceholderFragment class
