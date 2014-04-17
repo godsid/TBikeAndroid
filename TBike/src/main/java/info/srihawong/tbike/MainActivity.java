@@ -417,8 +417,12 @@ public class MainActivity extends ActionBarActivity
         @Override
         public void onAttach(Activity activity) {
             super.onAttach(activity);
-            ((MainActivity) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
+            try {
+                ((MainActivity) activity).onSectionAttached(
+                        getArguments().getInt(ARG_SECTION_NUMBER));
+            }catch (Exception e){
+
+            }
         }
 
         public void success(String result){

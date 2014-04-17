@@ -6,16 +6,100 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.text.format.DateFormat;
+import android.util.Log;
 
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.ResourceBundle;
 
 /**
  * Created by Demo on 2/27/14 AD.
  */
+
+class FaviriteData{
+    String id,forum_id,topic_id,user_id,title,username,sticky,topic_create_time;
+
+    FaviriteData() {
+    }
+    FaviriteData(String id,String forum_id, String topic_id, String user_id, String title, String username, String sticky, String topic_create_time) {
+        this.forum_id = forum_id;
+        this.topic_id = topic_id;
+        this.user_id = user_id;
+        this.title = title;
+        this.username = username;
+        this.sticky = sticky;
+        this.topic_create_time = topic_create_time;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getForum_id() {
+        return forum_id;
+    }
+
+    public void setForum_id(String forum_id) {
+        this.forum_id = forum_id;
+    }
+
+    public String getTopic_id() {
+        return topic_id;
+    }
+
+    public void setTopic_id(String topic_id) {
+        this.topic_id = topic_id;
+    }
+
+    public String getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getSticky() {
+        return sticky;
+    }
+
+    public void setSticky(String sticky) {
+        this.sticky = sticky;
+    }
+
+    public String getTopic_create_time() {
+        return topic_create_time;
+    }
+
+    public void setTopic_create_time(String topic_create_time) {
+        this.topic_create_time = topic_create_time;
+    }
+}
+
 public class FavoritesDB {
 
     private static final String TABLE_NAME = "Favorites";
@@ -91,6 +175,28 @@ public class FavoritesDB {
 
         return 1;
     }
+
+    public ArrayList<FaviriteData> getLimit(int limit,int offset){
+        ArrayList<FaviriteData> listItems = new ArrayList<FaviriteData>();
+        db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM "+TABLE_NAME+ " ORDER BY ID DESC LIMIT "+String.valueOf(offset)+","+String.valueOf(limit),null);
+
+        if(cursor!=null){
+            if(cursor.moveToFirst()){
+                do{
+                    listItems.add(new FaviriteData(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),cursor.getString(5),cursor.getString(6),cursor.getString(7)));
+                }while (cursor.moveToNext());
+            }
+        }
+        cursor.close();
+
+        //ContentValues values = new ContentValues();
+        return listItems;
+        //Log.d("tui", rs.getColumnNames().toString());
+
+
+    }
+
 
     public int delete(int topicID){
         db = dbHelper.getWritableDatabase();
