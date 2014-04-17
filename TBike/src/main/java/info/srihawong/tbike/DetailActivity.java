@@ -16,6 +16,8 @@ import android.webkit.WebViewClient;
 import android.support.v7.app.ActionBarActivity;
 import android.widget.Toast;
 
+import com.google.analytics.tracking.android.GoogleAnalytics;
+
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
@@ -26,15 +28,22 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 public class DetailActivity extends ActionBarActivity implements OnRefreshListener{
 
     private PullToRefreshLayout mPullToRefreshLayout;
-
+    MyGoogleAnalytics googleAnalytics;
     WebView webView;
     ProgressDialog progressDialog;
     WebViewClient webViewClient;
-
+    Integer topicId;
+    String topicTitle;
+    Boolean isOriginal;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+        googleAnalytics = new MyGoogleAnalytics(this);
+
+        topicId = getIntent().getIntExtra("topic_id",0);
+        topicTitle = getIntent().getStringExtra("title");
+        isOriginal = getIntent().getBooleanExtra("original",false);
 
         mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.layout_detail);
         ActionBarPullToRefresh.from(this)
@@ -84,8 +93,7 @@ public class DetailActivity extends ActionBarActivity implements OnRefreshListen
         webView.canGoBack();
         webView.canGoForward();
 
-        Integer topicId = getIntent().getIntExtra("topic_id",0);
-        Boolean isOriginal = getIntent().getBooleanExtra("original",false);
+
         String apiUrl;
         if(topicId!=0){
             //Point screenPoint = new Point();
@@ -93,8 +101,10 @@ public class DetailActivity extends ActionBarActivity implements OnRefreshListen
             getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
             if(isOriginal){
+                googleAnalytics.trackPage("Detail on ThaiMTB");
                 apiUrl = getResources().getString(R.string.api_topic_original)+"?t="+String.valueOf(topicId);
             }else{
+                googleAnalytics.trackPage("Detail");
                 apiUrl = getResources().getString(R.string.api_topic)+"?t="+String.valueOf(topicId)+"&w="+String.valueOf(metrics.widthPixels);
             }
 
@@ -130,7 +140,6 @@ public class DetailActivity extends ActionBarActivity implements OnRefreshListen
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.detail, menu);
-
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -144,10 +153,17 @@ public class DetailActivity extends ActionBarActivity implements OnRefreshListen
             Intent sendIntent = new Intent();
             sendIntent.setAction(Intent.ACTION_SEND);
             sendIntent.putExtra(Intent.EXTRA_SUBJECT, "TBike Share");
-            sendIntent.putExtra(Intent.EXTRA_TEXT,getIntent().getStringExtra("title")+" "+ getString(R.string.api_topic_original)+"?t="+String.valueOf(getIntent().getIntExtra("topic_id",0)));
+            sendIntent.putExtra(Intent.EXTRA_TEXT,topicTitle+"\n"+ getString(R.string.api_topic_original)+"?t="+String.valueOf(getIntent().getIntExtra("topic_id",0)));
             sendIntent.setType("text/plain");
             startActivity(Intent.createChooser(sendIntent, getResources().getString(R.string.share_title)));
 
+        }else if(id == R.id.action_openthaimtb){
+            Intent openDetail = new Intent(getApplicationContext(),DetailActivity.class);
+            openDetail.putExtra("topic_id",Integer.valueOf(topicId));
+            openDetail.putExtra("title",topicTitle);
+            openDetail.putExtra("original",true);
+            startActivity(openDetail);
+            overridePendingTransition(R.layout.transition_fromright, R.layout.transition_toleft);
         }
         return super.onOptionsItemSelected(item);
     }

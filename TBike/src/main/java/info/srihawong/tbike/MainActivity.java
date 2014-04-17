@@ -56,11 +56,15 @@ public class MainActivity extends ActionBarActivity
      */
     private CharSequence mTitle;
 
+    private Long doubleBackToExitPressedOnce = (long)0;
 
+    public MyGoogleAnalytics googleAnalytics;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Google Analytic Tracking
+        googleAnalytics = new MyGoogleAnalytics(this);
         setContentView(R.layout.activity_main);
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
@@ -86,18 +90,14 @@ public class MainActivity extends ActionBarActivity
     protected void onResume() {
         Log.d("tui","OnResume");
         super.onResume();
-
-        Toast.makeText(getApplicationContext(),"onResume",5000);
     }
 
     @Override
     protected void onResumeFragments() {
         Log.d("tui","OnResumeFragments");
         super.onResumeFragments();
-        Toast.makeText(getApplicationContext(),"Fragement Resume",5000);
         restoreActionBar();
     }
-
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
@@ -122,6 +122,7 @@ public class MainActivity extends ActionBarActivity
 
     public void onSectionAttached(int number) {
         mTitle = sectionArray[number-1];
+        googleAnalytics.trackPage(mTitle.toString());
     }
 
     public void restoreActionBar() {
@@ -175,8 +176,6 @@ public class MainActivity extends ActionBarActivity
             return true;
         }else if(id == R.id.action_refresh || id == R.id.action_navigation_refresh){
             onNavigationDrawerItemSelected(sectionSelectIndex);
-        }else if(id == R.id.action_social_share){
-            Toast.makeText(getApplicationContext(), "Share Social", Toast.LENGTH_SHORT).show();
         }
 
 
@@ -320,7 +319,6 @@ public class MainActivity extends ActionBarActivity
                     if(isSticky){
                         apiUrl+="&s=1";
                     }
-
                     Log.d("tui","GET:"+(apiUrl));
                     resultTopicJSON = new ApiJsonData(apiUrl).getJsonObject();
                     /*
@@ -374,18 +372,7 @@ public class MainActivity extends ActionBarActivity
                     topicListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                         @Override
                         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-
                             chooseTopicItem = topicListItems.get(position);
-                            //topicID = chooseTopicItem.getTopicId().toString();
-                             /*
-
-                            Intent openDetail = new Intent(getActivity().getApplicationContext(),DetailActivity.class);
-                            openDetail.putExtra("topic_id",topicListItems.get(position).getTopicId());
-                            openDetail.putExtra("title",topicListItems.get(position).getTitle());
-                            openDetail.putExtra("original",true);
-                            startActivity(openDetail);
-                            getActivity().overridePendingTransition(R.layout.transition_fromright,R.layout.transition_toleft);
-                               */
                             return false;
                         }
                     });
@@ -428,30 +415,25 @@ public class MainActivity extends ActionBarActivity
         @Override
         public boolean onContextItemSelected(MenuItem item) {
             String itemTitle = item.getTitle().toString();
+            int id = item.getItemId();
 
             if(itemTitle.equals(getResources().getString(R.string.option_add_favorites))){
-
-               favoritesDB.add(chooseTopicItem.getForumId(),chooseTopicItem.getTopicId(),chooseTopicItem.getUserId(),chooseTopicItem.getUsername(),chooseTopicItem.getTitle(),chooseTopicItem.getSticky(),chooseTopicItem.getCreateDate());
-                /*
-                try {
-                    long insertID = favoritesDB.add(Integer.getInteger(forumID),Integer.getInteger(topicID),"title", (long) 0);
-                    Util.Log(String.valueOf(insertID));
-                }catch (Exception e){
-                    Util.Log(e.getMessage().toString());
-                }*/
-
+                favoritesDB.add(chooseTopicItem.getForumId(), chooseTopicItem.getTopicId(), chooseTopicItem.getUserId(), chooseTopicItem.getUsername(), chooseTopicItem.getTitle(), chooseTopicItem.getSticky(), chooseTopicItem.getCreateDate());
                 Toast.makeText(getView().getContext(),getResources().getString(R.string.option_add_favorites),Toast.LENGTH_LONG).show();
-
             }else if(itemTitle.equals(getResources().getString(R.string.option_remove_favorites))){
                 favoritesDB.delete(chooseTopicItem.getTopicId());
                 Toast.makeText(getView().getContext(),getResources().getString(R.string.option_remove_favorites),Toast.LENGTH_LONG).show();
-
-            }else if(itemTitle.equals(getResources().getString(R.string.option_openthaimtb))){
+            }else if(id == R.id.action_openthaimtb){
                 openDetailOnThaiMTB();
+            }else if(id == R.id.action_social_share){
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_SUBJECT, "TBike Share");
+                sendIntent.putExtra(Intent.EXTRA_TEXT,chooseTopicItem.getTitle()+"\n"+ getString(R.string.api_topic_original)+"?t="+String.valueOf(chooseTopicItem.getTopicId()));
+                sendIntent.setType("text/plain");
+                startActivity(Intent.createChooser(sendIntent, getResources().getString(R.string.share_title)));
             }
-
             return super.onContextItemSelected(item);
-
         }
 
         @Override
@@ -476,15 +458,12 @@ public class MainActivity extends ActionBarActivity
 
         private void openDetailOnThaiMTB(){
             Intent openDetail = new Intent(getActivity().getApplicationContext(),DetailActivity.class);
-            openDetail.putExtra("topic_id",Integer.valueOf(topicID));
+            openDetail.putExtra("topic_id",Integer.valueOf(chooseTopicItem.getTopicId()));
             openDetail.putExtra("title",chooseTopicItem.getTitle());
             openDetail.putExtra("original",true);
             startActivity(openDetail);
             getActivity().overridePendingTransition(R.layout.transition_fromright,R.layout.transition_toleft);
         }
-
-
-
     }
     // End PlaceholderFragment class
 
@@ -492,6 +471,18 @@ public class MainActivity extends ActionBarActivity
         Intent openFavorites = new Intent(getApplicationContext(),FavoritesActivity.class);
         startActivity(openFavorites);
         overridePendingTransition(R.layout.transition_fromright,R.layout.transition_toleft);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(doubleBackToExitPressedOnce > System.currentTimeMillis()){
+            super.onBackPressed();
+            return;
+        }else{
+            doubleBackToExitPressedOnce = System.currentTimeMillis()+ Util.TOAST_LENGTH_LONG_TIME;
+            Toast.makeText(this,R.string.toast_back_to_close,Toast.LENGTH_LONG).show();
+        }
+
     }
 }
 // End MainActivity class

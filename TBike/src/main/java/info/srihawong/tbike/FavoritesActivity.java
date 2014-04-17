@@ -24,6 +24,8 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 public class FavoritesActivity extends ActionBarActivity {
 
+    public MyGoogleAnalytics googleAnalytics;
+
     private FavoritesDB favoritesDB;
     private ArrayList<TopicListItem> favoritesListItems;
     private TopicListAdapter topicListAdapter;
@@ -32,12 +34,17 @@ public class FavoritesActivity extends ActionBarActivity {
     private int chooseItem;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorites);
 
+        googleAnalytics = new MyGoogleAnalytics(this);
+        googleAnalytics.trackPage(getResources().getString(R.string.title_activity_favorites));
+
         searchText = (EditText) findViewById(R.id.listview_search);
+        searchText.setFocusable(true);
         favoritesListView = (ListView) findViewById(R.id.favoriteslistView);
         setTitle(R.string.title_activity_favorites);
         favoritesListItems = new ArrayList<TopicListItem>();
@@ -136,20 +143,28 @@ public class FavoritesActivity extends ActionBarActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         // Remove from Favorites
-        if(item.getTitle().equals(getString(R.string.option_remove_favorites))){
+        int id = item.getItemId();
+        if(id == R.id.option_favorite){
             favoritesDB.delete(favoritesListItems.get(chooseItem).getTopicId());
             favoritesListItems.remove(chooseItem);
             topicListAdapter.notifyDataSetChanged();
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.option_remove_favorites), Toast.LENGTH_LONG).show();
         // Open On ThaiMTB
-        }else if(item.getTitle().equals(getString(R.string.option_openthaimtb))){
+        }else if(id == R.id.action_openthaimtb){
             Intent openDetail = new Intent(getApplicationContext(),DetailActivity.class);
             openDetail.putExtra("topic_id",Integer.valueOf(favoritesListItems.get(chooseItem).getTopicId()));
             openDetail.putExtra("original",true);
             startActivity(openDetail);
             overridePendingTransition(R.layout.transition_fromright,R.layout.transition_toleft);
-
+        }else if(id == R.id.action_social_share){
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_SUBJECT, "TBike Share");
+            sendIntent.putExtra(Intent.EXTRA_TEXT,favoritesListItems.get(chooseItem).getTitle()+"\n"+ getString(R.string.api_topic_original)+"?t="+String.valueOf(favoritesListItems.get(chooseItem).getTopicId()));
+            sendIntent.setType("text/plain");
+            startActivity(Intent.createChooser(sendIntent, getResources().getString(R.string.share_title)));
         }
+
         return super.onContextItemSelected(item);
     }
 

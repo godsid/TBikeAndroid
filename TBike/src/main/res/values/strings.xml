@@ -44,6 +44,9 @@
 
     <string name="project_number">878893803826</string>
     <string name="title_activity_favorites">Favorites</string>
+    <string name="title_activity_about">Abouts</string>
     <string name="hello_world">Hello world!</string>
+
+    <string name="toast_back_to_close">กด Back อีกครั้งเพื่อออกจากโปรแกรม</string>
 
 </resources>

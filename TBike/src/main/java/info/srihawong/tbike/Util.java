@@ -12,6 +12,8 @@ import android.util.Log;
 public class Util {
     public static String TAG = "tui";
     public static final String PROPERTY_APP_VERSION = "appVersion";
+    public static final long TOAST_LENGTH_LONG_TIME = (long)3500;
+    public static final long TOAST_LENGHT_SGORT_TIME = (long)2000;
 
     String regid;
     /**
