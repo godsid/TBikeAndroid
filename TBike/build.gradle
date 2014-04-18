@@ -25,4 +25,11 @@ dependencies {
     compile: 'com.google.android.gms:play-services:4.0.30'
     compile 'com.github.chrisbanes.actionbarpulltorefresh:extra-abc:+'
     compile files('libs/libGoogleAnalyticsServices.jar','libs/android-query-full.0.26.8.jar')
+
+    /*
+        Documents
+        libGoogleAnalyticsServices.jar => https://github.com/chrisbanes/ActionBar-PullToRefresh
+        android-query-full.0.26.8.jar =>  https://code.google.com/p/android-query/wiki/AsyncAPI
+
+     */
 }

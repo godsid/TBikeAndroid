@@ -27,6 +27,10 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.androidquery.AQuery;
+import com.androidquery.callback.AjaxCallback;
+import com.androidquery.callback.AjaxStatus;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -208,6 +212,10 @@ public class MainActivity extends ActionBarActivity
         private String topicID ;
         private Boolean isSticky;
         private FavoritesDB favoritesDB;
+
+        private static int cacheTime;
+
+        private JSONArray resultTopicArray;
         /**
          * Returns a new instance of this fragment for the given section
          * number.
@@ -252,13 +260,13 @@ public class MainActivity extends ActionBarActivity
                     .theseChildrenArePullable(R.id.progressBar, R.id.topicListView, android.R.id.empty)
                     .listener(this)
                     .setup(mPullToRefreshLayout);
-
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
 
+            cacheTime = getResources().getInteger(R.integer.cache_time);
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             topicListView = (ListView) rootView.findViewById(R.id.topicListView);
             progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
@@ -278,13 +286,10 @@ public class MainActivity extends ActionBarActivity
                 public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
                    searchData();
                 }
-
                 @Override
                 public void afterTextChanged(Editable editable) {
-
                 }
             });
-
             return rootView;
         }
 
@@ -299,45 +304,30 @@ public class MainActivity extends ActionBarActivity
             topicListView.setAdapter(topicListAdapter);
             topicListAdapter.notifyDataSetChanged();
         }
-
         private void loadData(){
-            class TopicsJson extends AsyncTask<String, Integer, Long>{
-                private JSONObject resultTopicJSON;
-                //private ProgressDialog progressDialog = new ProgressDialog();
-                @Override
-                protected void onPreExecute() {
-                    progressBar.setVisibility(View.VISIBLE);
-                }
+            loadData(false);
+        }
+        private void loadData(Boolean refresh){
+            AQuery aq = new AQuery(getActivity());
+            String apiUrl = getResources().getString(R.string.api_forum);
+            long cache = cacheTime*1000;
+            if(refresh){
+                cache = -1;
+            }
+            apiUrl+= "?f="+forumID;
+            if(isSticky){
+                apiUrl+="&s=1";
+            }
+            Log.d("tui","GET:"+(apiUrl));
+            progressBar.setVisibility(View.VISIBLE);
+            //resultTopicArray = new ApiJsonData(apiUrl).getJsonObject();
 
+            aq.ajax(apiUrl,JSONObject.class,cache, new AjaxCallback<JSONObject>() {
                 @Override
-                protected Long doInBackground(String... strings) {
-                    //String forumID = getArguments().getString(ARG_SECTION_FORUM_ID);
-                    //String topicID = getArguments().getString(ARG_SECTION_TOPIC_ID,null);
-                    String apiUrl = getResources().getString(R.string.api_forum);
-
-                    apiUrl+= "?f="+forumID;
-                    if(isSticky){
-                        apiUrl+="&s=1";
-                    }
-                    Log.d("tui","GET:"+(apiUrl));
-                    resultTopicJSON = new ApiJsonData(apiUrl).getJsonObject();
-                    /*
+                public void callback(String url, JSONObject resp, AjaxStatus status) {
                     try {
-                        resultTopicJSON = new JSONObject("{\"status\":\"OK\",\"result\":[{\"createdate\":\"13 ก.ย. 2012 23:13\",\"f_id\":\"14\",\"topic_id\":\"596584\",\"title\":\"ชวนลงขัน/ตั้งค่าหัว  &quot;กองทุนให้รางวัลนำจับโจรทำร้ายและปล้นชาวจักรยาน&quot; ..... เปิดบัญชีรับโอนเงินแล้วครับ // update สมุด 16/10/55\",\"user_id\":\"57\",\"user_name\":\"nbt\"},{\"createdate\":\"29 ก.ย. 2010 11:21\",\"f_id\":\"3\",\"topic_id\":\"245525\",\"title\":\"== ผิดกติกาขาย แบนเตือน7 วัน ผู้ซื้อโปรดระวังจะติดต่อไม่ได้=\",\"user_id\":\"57\",\"user_name\":\"nbt\"},{\"createdate\":\"28 ก.ย. 2010 01:32\",\"f_id\":\"3\",\"topic_id\":\"245089\",\"title\":\"แนวทางในการดำเนินการเมื่อเกิดเหตุโดนฉ้อโกง\",\"user_id\":\"57\",\"user_name\":\"nbt\"}]}");
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    */
-                    return null;
-                }
-                @Override
-                public void onPostExecute(Long aLong) {
-                    super.onPostExecute(aLong);
-                    Log.d("tui", "Receive data");
-
-                    try {
-                        JSONArray resultTopicArray = resultTopicJSON.getJSONArray("result");
-
+                        //Log.d("tui",String.valueOf(resp.getJSONArray("result").length()));
+                        resultTopicArray = resp.getJSONArray("result");
                         if (resultTopicArray.length()>0) {
                             topicListItems.clear();
 
@@ -359,10 +349,7 @@ public class MainActivity extends ActionBarActivity
                         }
 
                     } catch (JSONException e) {
-
-                        Util.Log(e.getMessage());
-
-
+                        e.printStackTrace();
                     }
                     topicListAdapter = new TopicListAdapter(getActivity().getBaseContext(),topicListItems);
                     topicListView.setAdapter(topicListAdapter);
@@ -394,10 +381,7 @@ public class MainActivity extends ActionBarActivity
                         mPullToRefreshLayout.setRefreshComplete();
                     }
                 }
-            }
-
-            TopicsJson topicsJson = new TopicsJson();
-            topicsJson.execute();
+            });
         }
 
         @Override
@@ -449,7 +433,7 @@ public class MainActivity extends ActionBarActivity
 
         @Override
         public void onRefreshStarted(View view) {
-            loadData();
+            loadData(true);
         }
 
         public void success(String result){

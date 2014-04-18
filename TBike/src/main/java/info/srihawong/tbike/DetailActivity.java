@@ -63,7 +63,7 @@ public class DetailActivity extends ActionBarActivity implements OnRefreshListen
         webView = (WebView) findViewById(R.id.webView);
         WebSettings webSettings = webView.getSettings();
         webSettings.setAppCacheEnabled(true);
-        //webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
 
         webViewClient = new WebViewClient(){
             @Override
@@ -118,7 +118,11 @@ public class DetailActivity extends ActionBarActivity implements OnRefreshListen
     @Override
     public void onRefreshStarted(View view) {
         progressDialog.show();
+        WebSettings webSettings = webView.getSettings();
+        int tmpCacheMode = webSettings.getCacheMode();
+        webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         webView.reload();
+        webSettings.setCacheMode(tmpCacheMode);
     }
 
     @Override
@@ -134,7 +138,6 @@ public class DetailActivity extends ActionBarActivity implements OnRefreshListen
             super.onBackPressed();
             overridePendingTransition(R.layout.transition_fromleft, R.layout.transition_toright);
         }
-
     }
 
     @Override
@@ -147,8 +150,13 @@ public class DetailActivity extends ActionBarActivity implements OnRefreshListen
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if(id == R.id.action_refresh){
+            WebSettings webSettings = webView.getSettings();
+            int tempCacheMode = webSettings.getCacheMode();
+            webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
             progressDialog.show();
             webView.reload();
+            webSettings.setCacheMode(tempCacheMode);
+
         }else if(id == R.id.action_social_share){
             Intent sendIntent = new Intent();
             sendIntent.setAction(Intent.ACTION_SEND);
