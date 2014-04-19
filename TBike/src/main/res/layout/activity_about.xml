@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Version "
-        android:id="@+id/aboutVersion"
+        android:id="@+id/text_version"
         android:layout_marginTop="10dp"
         android:layout_marginLeft="5dp" />
 </LinearLayout>
