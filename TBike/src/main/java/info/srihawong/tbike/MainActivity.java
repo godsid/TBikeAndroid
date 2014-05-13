@@ -266,6 +266,18 @@ public class MainActivity extends ActionBarActivity
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
 
+            /*
+            open detail from share url */
+            Intent intent = getActivity().getIntent();
+            String action = intent.getAction();
+            if(Intent.ACTION_VIEW.equals(action)) {
+                Log.d("tui", intent.getDataString());
+                int topicId = Integer.valueOf(intent.getData().getQueryParameter("t"));
+                Intent openDetail = new Intent(getActivity().getApplicationContext(),DetailActivity.class);
+                openDetail.putExtra("topic_id",topicId);
+                startActivity(openDetail);
+                getActivity().overridePendingTransition(R.layout.transition_fromright,R.layout.transition_toleft);
+            }
             cacheTime = getResources().getInteger(R.integer.cache_time);
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             topicListView = (ListView) rootView.findViewById(R.id.topicListView);
