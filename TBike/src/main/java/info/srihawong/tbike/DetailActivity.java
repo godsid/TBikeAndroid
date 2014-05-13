@@ -41,9 +41,11 @@ public class DetailActivity extends ActionBarActivity implements OnRefreshListen
         setContentView(R.layout.activity_detail);
         googleAnalytics = new MyGoogleAnalytics(this);
 
-        topicId = getIntent().getIntExtra("topic_id",0);
-        topicTitle = getIntent().getStringExtra("title");
-        isOriginal = getIntent().getBooleanExtra("original",false);
+        Intent intent = getIntent();
+
+        topicId = intent.getIntExtra("topic_id",0);
+        topicTitle = intent.getStringExtra("title");
+        isOriginal = intent.getBooleanExtra("original",false);
 
         mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.layout_detail);
         ActionBarPullToRefresh.from(this)
