@@ -14,6 +14,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.support.v7.app.ActionBarActivity;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.analytics.tracking.android.GoogleAnalytics;
@@ -30,6 +31,7 @@ public class DetailActivity extends ActionBarActivity implements OnRefreshListen
     private PullToRefreshLayout mPullToRefreshLayout;
     MyGoogleAnalytics googleAnalytics;
     WebView webView;
+    TextView titleTextView;
     ProgressDialog progressDialog;
     WebViewClient webViewClient;
     Integer topicId;
@@ -46,7 +48,7 @@ public class DetailActivity extends ActionBarActivity implements OnRefreshListen
         topicId = intent.getIntExtra("topic_id",0);
         topicTitle = intent.getStringExtra("title");
         isOriginal = intent.getBooleanExtra("original",false);
-
+        setTitle(topicTitle);
         mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.layout_detail);
         ActionBarPullToRefresh.from(this)
                 .allChildrenArePullable()
@@ -61,7 +63,8 @@ public class DetailActivity extends ActionBarActivity implements OnRefreshListen
         //progressDialog.setIndeterminateDrawable(R.style.TransparentProgressDialog);
 
         progressDialog.show();
-
+        titleTextView = (TextView) findViewById(R.id.txtTitle);
+        titleTextView.setText(topicTitle);
         webView = (WebView) findViewById(R.id.webView);
         WebSettings webSettings = webView.getSettings();
         webSettings.setAppCacheEnabled(true);

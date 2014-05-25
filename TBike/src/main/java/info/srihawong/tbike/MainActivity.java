@@ -271,6 +271,7 @@ public class MainActivity extends ActionBarActivity
             Intent intent = getActivity().getIntent();
             String action = intent.getAction();
             if(Intent.ACTION_VIEW.equals(action)) {
+                intent.setAction(null);
                 Log.d("tui", intent.getDataString());
                 int topicId = Integer.valueOf(intent.getData().getQueryParameter("t"));
                 Intent openDetail = new Intent(getActivity().getApplicationContext(),DetailActivity.class);
@@ -310,6 +311,9 @@ public class MainActivity extends ActionBarActivity
             for(int j=0,k=topicListItems.size();j<k;j++){
                 if(topicListItems.get(j).getTitle().contains(searchText.getText().toString().trim())){
                     searchTopicItems.add(topicListItems.get(j));
+                    //topicListAdapter.getView(j,null,null).setVisibility(View.VISIBLE);
+                }else{
+                    //topicListAdapter.getView(j,null,null).setVisibility(View.INVISIBLE);
                 }
             }
             topicListAdapter = new TopicListAdapter(getActivity().getBaseContext(),searchTopicItems);
@@ -379,7 +383,8 @@ public class MainActivity extends ActionBarActivity
                     topicListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                            chooseTopicItem  = topicListItems.get(position);
+                            chooseTopicItem = topicListAdapter.getItem(position);
+                            //chooseTopicItem  = topicListItems.get(position);
                             Intent openDetail = new Intent(getActivity().getApplicationContext(),DetailActivity.class);
                             openDetail.putExtra("topic_id",chooseTopicItem.getTopicId());
                             openDetail.putExtra("title",chooseTopicItem.getTitle());
